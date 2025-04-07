@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 // Función para eliminar acentos
 const quitarAcentos = (str) => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-// Función para reproducir sonidos
+//  sonidos
 const playSound = (sound) => {
     new Audio(`/sounds/${sound}.mp3`).play();
 };
@@ -18,12 +18,13 @@ export default function Quiz() {
     const [mostrarEspanol, setMostrarEspanol] = useState(false);
     const [nivelesSeleccionados, setNivelesSeleccionados] = useState([10]);
     const [palabras, setPalabras] = useState([]);
-    const [palabrasUsadas, setPalabrasUsadas] = useState([]); // Para evitar repeticiones (aunque ahora no lo usaremos)
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const modo = new URLSearchParams(location.search).get("modo") || "chino-espanol";
+
+    const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
     // Cargar palabras según los niveles seleccionados
     const cargarPalabras = () => {
@@ -36,10 +37,10 @@ export default function Quiz() {
         const niveles = nivelesSeleccionados;
         let palabrasCargadas = [];
 
-        // Cargar palabras para cada nivel seleccionado
+        // Cargar palabras
         Promise.all(
             niveles.map((nivel) =>
-                fetch(`http://localhost:5000/api/palabras?niveles=${nivel}`)
+                fetch(`${backendUrl}/api/palabras?niveles=${nivel}`)
                     .then((res) => res.json())
                     .then((data) => {
                         palabrasCargadas = [...palabrasCargadas, ...data];
@@ -47,11 +48,11 @@ export default function Quiz() {
             )
         ).then(() => {
             setPalabras(palabrasCargadas);
-            seleccionarPalabraAleatoria(palabrasCargadas); // Seleccionar palabra aleatoria al cargar las palabras
+            seleccionarPalabraAleatoria(palabrasCargadas); // Seleccionar palabra aleatoria
         });
     };
 
-    // Seleccionar una palabra aleatoria de las palabras disponibles
+    // Seleccionar una palabra aleatoria
     const seleccionarPalabraAleatoria = (palabrasDisponibles) => {
         if (palabrasDisponibles.length === 0) {
             setMensaje("No hay palabras disponibles.");
@@ -62,7 +63,7 @@ export default function Quiz() {
         setPalabra(palabraAleatoria);
     };
 
-    // Usar useEffect para cargar las palabras cuando cambian los niveles seleccionados
+
     useEffect(() => {
         cargarPalabras();
     }, [nivelesSeleccionados]);
@@ -86,7 +87,7 @@ export default function Quiz() {
                 setMostrarChino(respuesta !== correctaChino);
             }
             setTimeout(() => {
-                cargarPalabras(); // Cargar nuevas palabras después de 2 segundos
+                cargarPalabras(); // Cargar 2 segundos
             }, 2000);
         } else {
             setMensaje("❌ Inténtalo de nuevo");
@@ -108,7 +109,7 @@ export default function Quiz() {
 
     useEffect(() => {
         if (palabras.length > 0) {
-            seleccionarPalabraAleatoria(palabras); // Selecciona una palabra aleatoria después de que las palabras se actualizan
+            seleccionarPalabraAleatoria(palabras); // Selecciona una palabra aleatoria se actualizan
         }
     }, [palabras]);
 
@@ -196,9 +197,8 @@ export default function Quiz() {
                                     <button
                                         key={nivel}
                                         onClick={() => toggleNivel(nivel)}
-                                        className={`btn btn-lg fw-bold px-4 py-2 ${
-                                            nivelesSeleccionados.includes(nivel) ? "btn-primary" : "btn-outline-primary"
-                                        }`}
+                                        className={`btn btn-lg fw-bold px-4 py-2 ${nivelesSeleccionados.includes(nivel) ? "btn-primary" : "btn-outline-primary"
+                                            }`}
                                         style={{ width: "120px", height: "50px" }} // Tamaño uniforme
                                     >
                                         {nivel}
