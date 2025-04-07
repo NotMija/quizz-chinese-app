@@ -1,16 +1,14 @@
-// Requerimos los paquetes necesarios
-require('dotenv').config(); // Para cargar las variables del .env
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-// Inicializamos Express
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Para poder manejar datos en formato JSON
+app.use(express.json());
 
 // Conexión a MongoDB usando Mongoose
 const connectDB = async () => {
@@ -72,7 +70,6 @@ app.get('/api/palabras', async (req, res) => {
   }
 });
 
-// Arrancar el servidor en el puerto especificado
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });
