@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-// Función para eliminar acentos
 const quitarAcentos = (str) => str.normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-//  sonidos
 const playSound = (sound) => {
     new Audio(`/sounds/${sound}.mp3`).play();
 };
@@ -24,55 +22,75 @@ export default function Quiz() {
 
     const modo = new URLSearchParams(location.search).get("modo") || "chino-espanol";
 
-    const backendUrl = process.env.REACT_APP_BACKEND_URL;
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-    // Cargar palabras según los niveles seleccionados
     const cargarPalabras = () => {
         setMostrarSolucion(false);
         setMostrarChino(false);
         setMostrarEspanol(false);
         setRespuesta("");
-        setMensaje("");
+        setMensaje("Cargando palabras..."); // Mostrar mensaje mientras carga
 
-        const niveles = nivelesSeleccionados;
-        let palabrasCargadas = [];
-
-        // Cargar palabras
-        Promise.all(
-            niveles.map((nivel) =>
-                fetch(`${backendUrl}/api/palabras?niveles=${nivel}`)
-                    .then((res) => res.json())
-                    .then((data) => {
-                        palabrasCargadas = [...palabrasCargadas, ...data];
-                    })
-            )
-        ).then(() => {
-            setPalabras(palabrasCargadas);
-            seleccionarPalabraAleatoria(palabrasCargadas); // Seleccionar palabra aleatoria
-        });
-    };
-
-    // Seleccionar una palabra aleatoria
-    const seleccionarPalabraAleatoria = (palabrasDisponibles) => {
-        if (palabrasDisponibles.length === 0) {
-            setMensaje("No hay palabras disponibles.");
+        if (nivelesSeleccionados.length === 0) {
+            setPalabras([]);
+            setMensaje("Selecciona al menos un nivel.");
+            setPalabra(null);
             return;
         }
 
+        const nivelesQueryParam = nivelesSeleccionados.join(',');
+        const url = `${apiUrl}/api/palabras?niveles=${nivelesQueryParam}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status} - ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                setPalabras(data);
+                setMensaje(""); // Limpiar mensaje si la carga es exitosa
+                if (data.length === 0) {
+                    setMensaje("No hay palabras para los niveles seleccionados.");
+                    setPalabra(null); // Limpiar palabra si no hay datos
+                }
+            })
+            .catch(error => {
+                console.error("❌ Error al cargar palabras:", error);
+                setMensaje("Error al cargar palabras. Revisa la conexión o la URL de la API.");
+                setPalabras([]);
+                setPalabra(null);
+            });
+    };
+
+    const seleccionarPalabraAleatoria = (palabrasDisponibles) => {
+        if (!palabrasDisponibles || palabrasDisponibles.length === 0) {
+            setPalabra(null); // Asegurar que no hay palabra si no hay disponibles
+            return;
+        }
         const palabraAleatoria = palabrasDisponibles[Math.floor(Math.random() * palabrasDisponibles.length)];
         setPalabra(palabraAleatoria);
     };
 
-
     useEffect(() => {
         cargarPalabras();
-    }, [nivelesSeleccionados]);
+    }, [nivelesSeleccionados]); // Se ejecuta cuando cambian los niveles seleccionados
+
+    useEffect(() => {
+        // Selecciona una palabra aleatoria cuando el array 'palabras' se actualiza y tiene contenido
+        if (palabras.length > 0) {
+            seleccionarPalabraAleatoria(palabras);
+        }
+    }, [palabras]); // Se ejecuta cuando el estado 'palabras' cambia
+
 
     const comprobarRespuesta = () => {
+        if (!palabra) return; // No hacer nada si no hay palabra cargada
+
         let correctaPinyin = quitarAcentos(palabra.pinyin.toLowerCase());
         let correctaChino = palabra.chino;
         let correctaEspanol = quitarAcentos(palabra.español.toLowerCase());
-
         let respuestaNormalizada = quitarAcentos(respuesta.toLowerCase());
 
         if (
@@ -87,7 +105,13 @@ export default function Quiz() {
                 setMostrarChino(respuesta !== correctaChino);
             }
             setTimeout(() => {
-                cargarPalabras(); // Cargar 2 segundos
+                // En lugar de cargar todo, solo selecciona otra palabra de las ya cargadas
+                seleccionarPalabraAleatoria(palabras);
+                setMensaje("");
+                setRespuesta("");
+                setMostrarEspanol(false);
+                setMostrarChino(false);
+                setMostrarSolucion(false);
             }, 2000);
         } else {
             setMensaje("❌ Inténtalo de nuevo");
@@ -107,19 +131,26 @@ export default function Quiz() {
         );
     };
 
-    useEffect(() => {
-        if (palabras.length > 0) {
-            seleccionarPalabraAleatoria(palabras); // Selecciona una palabra aleatoria se actualizan
-        }
-    }, [palabras]);
+    const saltarPalabra = () => {
+        setMostrarSolucion(false);
+        setMostrarChino(false);
+        setMostrarEspanol(false);
+        setRespuesta("");
+        setMensaje("");
+        seleccionarPalabraAleatoria(palabras); // Simplemente selecciona otra palabra
+    };
 
-    if (!palabra) return <p className="text-danger">Cargando palabra...</p>;
 
-    // Dividir los niveles en 2 columnas
+    // Mostrar mensaje de carga inicial o si no hay palabra
+    if (mensaje.includes("Cargando") || !palabra && mensaje === "") return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">{mensaje || "Cargando palabra..."}</p></div>;
+    // Mostrar mensaje si no hay palabras para los niveles seleccionados
+    if (!palabra && mensaje !== "") return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-warning fs-3">{mensaje}</p></div>;
+
+
     const niveles = [10, 20, 40, 60, 80, 100];
     const columnas = [
-        niveles.slice(0, 3),  // 10, 20, 40
-        niveles.slice(3, 6),  // 60, 80, 100
+        niveles.slice(0, 3),
+        niveles.slice(3, 6),
     ];
 
     return (
@@ -135,7 +166,6 @@ export default function Quiz() {
 
             <div className="d-flex flex-column flex-md-row align-items-center gap-4">
 
-                {/* Tarjeta del Quiz */}
                 <div className="card p-5 shadow-lg rounded-4 bg-light text-center">
                     <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : palabra.español}</h1>
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
@@ -152,7 +182,7 @@ export default function Quiz() {
                         ✅ Comprobar
                     </button>
 
-                    {mensaje && <p className="mt-3 fs-4 fw-bold">{mensaje}</p>}
+                    {mensaje && !mensaje.includes("Cargando") && <p className={`mt-3 fs-4 fw-bold ${mensaje.includes("✅") ? 'text-success' : mensaje.includes("❌") ? 'text-danger' : 'text-info'}`}>{mensaje}</p>}
 
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
@@ -163,7 +193,7 @@ export default function Quiz() {
                     )}
 
                     <div className="mt-4 d-flex gap-3">
-                        <button onClick={cargarPalabras} className="btn btn-warning btn-lg">
+                        <button onClick={saltarPalabra} className="btn btn-warning btn-lg">
                             🔄 Saltar palabra
                         </button>
 
@@ -186,10 +216,8 @@ export default function Quiz() {
                     )}
                 </div>
 
-                {/* Selección de niveles */}
                 <div className="d-flex flex-column align-items-center gap-3 w-100">
                     <h3 className="fw-bold text-center">Número de palabras</h3>
-
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
                             <div key={index} className="d-flex flex-column align-items-center gap-3">
@@ -197,9 +225,8 @@ export default function Quiz() {
                                     <button
                                         key={nivel}
                                         onClick={() => toggleNivel(nivel)}
-                                        className={`btn btn-lg fw-bold px-4 py-2 ${nivelesSeleccionados.includes(nivel) ? "btn-primary" : "btn-outline-primary"
-                                            }`}
-                                        style={{ width: "120px", height: "50px" }} // Tamaño uniforme
+                                        className={`btn btn-lg fw-bold px-4 py-2 ${nivelesSeleccionados.includes(nivel) ? "btn-primary" : "btn-outline-primary"}`}
+                                        style={{ width: "120px", height: "50px" }}
                                     >
                                         {nivel}
                                     </button>
