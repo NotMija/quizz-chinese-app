@@ -10,18 +10,20 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Conexión a MongoDB usando Mongoose
 const connectDB = async () => {
   try {
-    // Elimina el objeto { useNewUrlParser: true, useUnifiedTopology: true }
-    await mongoose.connect(process.env.MONGO_URI); // Déjalo así
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log('✔️ Conectado a MongoDB');
   } catch (error) {
     console.error('❌ Error al conectar a MongoDB', error);
-    process.exit(1);
+    process.exit(1); // Si la conexión falla, cerramos el proceso
   }
 };
 
-// Llamamos a la función para conectar a la base de datos
 connectDB();
 
 // Definir el esquema de la colección de palabras
@@ -66,6 +68,7 @@ app.get('/api/palabras', async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
+
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
