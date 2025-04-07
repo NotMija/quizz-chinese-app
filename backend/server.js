@@ -8,25 +8,23 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
+// Middleware para parsear JSON bodies
 app.use(express.json());
 
-// Conexión a MongoDB usando Mongoose
+// --- Conexión a MongoDB ---
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('✔️ Conectado a MongoDB');
+    // Conexión usando la variable de entorno MONGO_URI
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✔️ Conectado a MongoDB'); 
   } catch (error) {
     console.error('❌ Error al conectar a MongoDB', error);
-    process.exit(1); // Si la conexión falla, cerramos el proceso
+    process.exit(1);
   }
 };
 
 connectDB();
 
-// Definir el esquema de la colección de palabras
 const palabraSchema = new mongoose.Schema({
   chino: { type: String, required: true },
   pinyin: { type: String, required: true },
@@ -34,10 +32,9 @@ const palabraSchema = new mongoose.Schema({
   nivel: { type: Number, required: true },
 });
 
-// Crear el modelo de palabras
 const Palabra = mongoose.model('Palabra', palabraSchema);
 
-// 🟢 Endpoint para obtener una palabra aleatoria según los niveles seleccionados
+
 app.get('/api/palabra', async (req, res) => {
   const niveles = req.query.niveles ? req.query.niveles.split(',').map(Number) : [10];
 
@@ -56,7 +53,7 @@ app.get('/api/palabra', async (req, res) => {
   }
 });
 
-// 🟢 Endpoint para obtener todas las palabras filtradas por niveles
+// Endpoint para obtener todas las palabras filtradas
 app.get('/api/palabras', async (req, res) => {
   const niveles = req.query.niveles ? req.query.niveles.split(',').map(Number) : [10];
 
@@ -69,7 +66,9 @@ app.get('/api/palabras', async (req, res) => {
   }
 });
 
-
+// --- Iniciar el servidor ---
 app.listen(PORT, () => {
+  // Mensaje cuando el servidor arranca y escucha en el puerto correcto
+  // En Render, PORT será asignado por la plataforma (ej: 10000)
   console.log(`✅ Servidor corriendo en http://localhost:${PORT}`);
 });
