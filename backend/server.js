@@ -30,7 +30,7 @@ const palabraSchema = new mongoose.Schema({
   pinyin: { type: String, required: true },
   español: { type: String, required: true },
   nivel: { type: Number, required: true },
-});
+}, { collection: 'Palabras' });
 
 const Palabra = mongoose.model('Palabra', palabraSchema);
 
