@@ -153,10 +153,10 @@ export default function Quiz() {
 
 
     // Definición de niveles para renderizar los botones en columnas
-    const nivelesDisponibles = [10, 20, 40, 60, 80, 100];
+    const nivelesDisponibles = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const columnas = [
-        nivelesDisponibles.slice(0, 3),
-        nivelesDisponibles.slice(3, 6),
+        nivelesDisponibles.slice(0, 5),
+        nivelesDisponibles.slice(5, 10),
     ];
 
     // JSX principal
@@ -234,7 +234,7 @@ export default function Quiz() {
 
                 {/* Selección de niveles */}
                 <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
-                    <h3 className="fw-bold text-center mb-3">Niveles</h3>
+                    <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {/* Renderiza los botones de nivel en columnas */}
                         {columnas.map((columna, index) => (
@@ -246,7 +246,7 @@ export default function Quiz() {
                                         className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-success" : "btn-outline-dark"}`} // Estilo cambiado
                                         style={{ width: "120px", height: "50px" }} // Tamaño uniforme
                                     >
-                                        {nivel} Palabras
+                                        {nivel}
                                     </button>
                                 ))}
                             </div>
