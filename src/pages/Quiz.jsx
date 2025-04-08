@@ -88,9 +88,9 @@ export default function Quiz() {
         // --- Lógica Chino -> Español ---
         if (modo === "chino-espanol") {
             if (!Array.isArray(palabra.español)) {
-                 console.error("Error: Se esperaba un array en palabra.español", palabra.español);
-                 setMensaje("Error interno: formato de respuesta inválido.");
-                 return;
+                console.error("Error: Se esperaba un array en palabra.español", palabra.español);
+                setMensaje("Error interno: formato de respuesta inválido.");
+                return;
             }
             esLaRespuestaCorrecta = palabra.español.some(variante =>
                 quitarAcentos(variante.toLowerCase()) === respuestaNormalizada
@@ -115,18 +115,18 @@ export default function Quiz() {
             setMensaje("✅ ¡Correcto! Nueva palabra en 2 segundos...");
             playSound("correct");
             setTimeout(() => {
-                 seleccionarPalabraAleatoria(palabras);
-                 setMensaje("");
-                 setRespuesta("");
-                 setMostrarEspanol(false);
-                 setMostrarChino(false);
-                 setMostrarSolucion(false);
+                seleccionarPalabraAleatoria(palabras);
+                setMensaje("");
+                setRespuesta("");
+                setMostrarEspanol(false);
+                setMostrarChino(false);
+                setMostrarSolucion(false);
             }, 2000);
         } else {
-             if (!(modo === "chino-espanol" && !Array.isArray(palabra.español))) {
-                 setMensaje("❌ Inténtalo de nuevo");
-                 playSound("wrong");
-             }
+            if (!(modo === "chino-espanol" && !Array.isArray(palabra.español))) {
+                setMensaje("❌ Inténtalo de nuevo");
+                playSound("wrong");
+            }
         }
     };
 
@@ -177,8 +177,8 @@ export default function Quiz() {
             </button>
 
             <div className="d-flex flex-column flex-md-row align-items-center gap-4 w-100 justify-content-center">
-                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{maxWidth: '500px'}}>
-                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : (Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español) }</h1>
+                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{ maxWidth: '500px' }}>
+                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : (Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español)}</h1>
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     <input
@@ -197,9 +197,9 @@ export default function Quiz() {
 
                     {mensaje && !mensaje.includes("Cargando") && <p className={`mt-3 fs-4 fw-bold ${mensaje.includes("✅") ? 'text-success' : mensaje.includes("❌") ? 'text-danger' : 'text-info'}`}>{mensaje}</p>}
 
-                     {/* Mostrar la(s) respuesta(s) correcta(s) en español si se acertó */}
+                    {/* Mostrar la(s) respuesta(s) correcta(s) en español si se acertó */}
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
-                         <p className="mt-3 fs-3 text-success fw-bold">{Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
+                        <p className="mt-3 fs-3 text-success fw-bold">{Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
                     )}
                     {/* Mostrar la(s) respuesta(s) correcta(s) en chino/pinyin si se acertó */}
                     {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
@@ -231,8 +231,8 @@ export default function Quiz() {
                     )}
                 </div>
 
-                <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
-                    <h3 className="fw-bold text-center mb-3">Niveles</h3>
+                <div className="d-flex flex-column align-items-center gap-3" style={{ maxWidth: '300px' }}>
+                    <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
                             <div key={index} className="d-flex flex-column align-items-center gap-3">
@@ -243,7 +243,7 @@ export default function Quiz() {
                                         className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-success" : "btn-outline-dark"}`}
                                         style={{ width: "150px", height: "50px" }}
                                     >
-                                        Nivel {nivel}
+                                        {nivel}
                                     </button>
                                 ))}
                             </div>
