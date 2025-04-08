@@ -80,7 +80,7 @@ export default function Quiz() {
     }, [palabras]);
 
     const comprobarRespuesta = () => {
-        if (!palabra) return; 
+        if (!palabra) return;
 
         let respuestaNormalizada = quitarAcentos(respuesta.toLowerCase());
         let esLaRespuestaCorrecta = false;
@@ -89,16 +89,16 @@ export default function Quiz() {
         if (modo === "chino-espanol") {
             // Verificar que palabra.español sea un array
             if (!Array.isArray(palabra.español)) {
-                 console.error("Error: Se esperaba un array en palabra.español para modo chino-espanol", palabra.español);
-                 setMensaje("Error interno: formato de respuesta inválido.");
-                 return;
+                console.error("Error: Se esperaba un array en palabra.español para modo chino-espanol", palabra.español);
+                setMensaje("Error interno: formato de respuesta inválido.");
+                return;
             }
             esLaRespuestaCorrecta = palabra.español.some(variante =>
                 quitarAcentos(variante.toLowerCase()) === respuestaNormalizada
             );
 
             if (esLaRespuestaCorrecta) {
-                setMostrarEspanol(true); 
+                setMostrarEspanol(true);
             }
         }
         // --- Lógica Español -> Chino
@@ -108,7 +108,7 @@ export default function Quiz() {
             // Comprobar si coincide
             if (respuestaNormalizada === correctaPinyin || respuesta === correctaChino) {
                 esLaRespuestaCorrecta = true;
-                setMostrarChino(respuesta !== correctaChino); 
+                setMostrarChino(respuesta !== correctaChino);
             }
         }
 
@@ -118,19 +118,19 @@ export default function Quiz() {
             playSound("correct");
             // Pasar a la siguiente palabra después de 2 segundos
             setTimeout(() => {
-                 seleccionarPalabraAleatoria(palabras);
-                 setMensaje("");
-                 setRespuesta("");
-                 setMostrarEspanol(false); 
-                 setMostrarChino(false);
-                 setMostrarSolucion(false);
+                seleccionarPalabraAleatoria(palabras);
+                setMensaje("");
+                setRespuesta("");
+                setMostrarEspanol(false);
+                setMostrarChino(false);
+                setMostrarSolucion(false);
             }, 2000);
         } else {
-             // Solo muestra incorrecto si no hubo error de formato antes
-             if (!(modo === "chino-espanol" && !Array.isArray(palabra.español))) {
-                 setMensaje("❌ Inténtalo de nuevo");
-                 playSound("wrong");
-             }
+            // Solo muestra incorrecto si no hubo error de formato antes
+            if (!(modo === "chino-espanol" && !Array.isArray(palabra.español))) {
+                setMensaje("❌ Inténtalo de nuevo");
+                playSound("wrong");
+            }
         }
     };
 
@@ -180,7 +180,8 @@ export default function Quiz() {
             {/* Botón Volver */}
             <button
                 onClick={() => navigate("/")}
-                className="position-absolute top-0 start-0 m-3 btn btn-warning text-dark fw-bold shadow-sm"
+                className="m-3 btn btn-warning text-dark fw-bold shadow-sm"
+                style={{ position: 'fixed', top: '1rem', left: '1rem', zIndex: 10 }}
             >
                 ⬅️ Volver al inicio
             </button>
@@ -189,10 +190,10 @@ export default function Quiz() {
             <div className="d-flex flex-column flex-md-row align-items-center gap-4 w-100 justify-content-center">
 
                 {/* Card del Quiz */}
-                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{maxWidth: '500px'}}>
+                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{ maxWidth: '500px' }}>
 
-                     {/* --- Palabra a adivinar */}
-                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : (Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español) }</h1>
+                    {/* --- Palabra a adivinar */}
+                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : (Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español)}</h1>
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     {/* Input de respuesta */}
@@ -214,9 +215,9 @@ export default function Quiz() {
                     {/* Mensaje de Feedback */}
                     {mensaje && !mensaje.includes("Cargando") && <p className={`mt-3 fs-4 fw-bold ${mensaje.includes("✅") ? 'text-success' : mensaje.includes("❌") ? 'text-danger' : 'text-info'}`}>{mensaje}</p>}
 
-                     {/* --- Mostrar la(s) respuesta(s) correcta(s) */}
+                    {/* --- Mostrar la(s) respuesta(s) correcta(s) */}
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
-                         <p className="mt-3 fs-3 text-success fw-bold">{Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
+                        <p className="mt-3 fs-3 text-success fw-bold">{Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
                     )}
                     {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
                         <p className="mt-3 fs-3 text-danger fw-bold">{palabra.chino} ({palabra.pinyin})</p>
@@ -247,7 +248,7 @@ export default function Quiz() {
                     )}
                 </div>
 
-               <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
+                <div className="d-flex flex-column align-items-center gap-3" style={{ maxWidth: '300px' }}>
                     <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
