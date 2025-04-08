@@ -27,7 +27,7 @@ connectDB();
 
 const palabraSchema = new mongoose.Schema({
   chino: { type: String, required: true },
-  pinyin: { type: String, required: true },
+  pinyin: { type: [String], required: true },
   español: { type: [String], required: true },
   nivel: { type: Number, required: true },
 }, { collection: 'Palabras' });
