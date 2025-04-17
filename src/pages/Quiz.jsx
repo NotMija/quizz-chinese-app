@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react"; // Añadir useRef
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const quitarAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Corregido regex para acentos
+const quitarAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 const playSound = (sound) => {
     new Audio(`/sounds/${sound}.mp3`).play();
@@ -80,9 +80,8 @@ export default function Quiz() {
         }
     }, [palabras]);
 
-    // useEffect para poner el foco en el input cuando cambia la palabra
     useEffect(() => {
-        if (palabra && inputRef.current && !mensaje.includes("✅")) { // Añadido !mensaje.includes("✅") para no re-enfocar durante el delay de éxito
+        if (palabra && inputRef.current && !mensaje.includes("✅")) {
              inputRef.current.focus();
         }
     }, [palabra, mensaje]);
@@ -94,34 +93,26 @@ export default function Quiz() {
         let respuestaNormalizada = quitarAcentos(respuesta.toLowerCase());
         let esLaRespuestaCorrecta = false;
 
+        const palabraEsp = palabra.español || "";
+        const palabraPin = palabra.pinyin || "";
+        const palabraChi = palabra.chino || "";
+
         if (modo === "chino-espanol") {
-            if (!Array.isArray(palabra.español)) {
-                 console.error("Error: Se esperaba un array en palabra.español", palabra.español);
-                 setMensaje("Error interno: formato de respuesta inválido.");
-                 return;
-            }
-            esLaRespuestaCorrecta = palabra.español.some(variante =>
-                 quitarAcentos(variante.toLowerCase()) === respuestaNormalizada
-            );
+            let correctaEsp = quitarAcentos(palabraEsp.toLowerCase());
+            esLaRespuestaCorrecta = (correctaEsp === respuestaNormalizada);
 
             if (esLaRespuestaCorrecta) {
-                 setMostrarEspanol(true);
+                setMostrarEspanol(true);
             }
         }
         else if (modo === "espanol-chino") {
-            if (!Array.isArray(palabra.pinyin)) {
-                 console.error("Error: Se esperaba un array en palabra.pinyin", palabra.pinyin);
-                 setMensaje("Error interno: formato de pinyin inválido.");
-                 return;
-            }
-            let pinyinCorrecto = palabra.pinyin.some(variante =>
-                 quitarAcentos(variante.toLowerCase()) === respuestaNormalizada
-            );
-            let chinoCorrecto = (respuesta === palabra.chino);
+            let correctaPin = quitarAcentos(palabraPin.toLowerCase());
+            let pinyinCorrecto = (correctaPin === respuestaNormalizada);
+            let chinoCorrecto = (respuesta === palabraChi);
 
             if (pinyinCorrecto || chinoCorrecto) {
-                 esLaRespuestaCorrecta = true;
-                 setMostrarChino(respuesta !== palabra.chino); // Muestra chino solo si la respuesta NO fue el carácter chino
+                esLaRespuestaCorrecta = true;
+                setMostrarChino(true); // Mostrar siempre la respuesta correcta si acierta
             }
         }
 
@@ -135,25 +126,19 @@ export default function Quiz() {
                  setMostrarEspanol(false);
                  setMostrarChino(false);
                  setMostrarSolucion(false);
-                 // El foco se pondrá por el useEffect [palabra, mensaje]
             }, 2000);
         } else {
-             // Solo mostrar mensaje de error si no hubo un error de formato previo
-             if (!(modo === "chino-espanol" && !Array.isArray(palabra.español)) && !(modo === "espanol-chino" && !Array.isArray(palabra.pinyin))) {
-                  setMensaje("❌ Inténtalo de nuevo");
-                  playSound("wrong");
-                  // Seleccionar texto en el input para facilitar corrección
-                  if (inputRef.current) {
-                      inputRef.current.select();
-                  }
-             }
+            setMensaje("❌ Inténtalo de nuevo");
+            playSound("wrong");
+            if (inputRef.current) {
+                inputRef.current.select();
+            }
         }
     };
 
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            // Prevenir comprobación si ya está mostrando el mensaje de correcto (durante el timeout)
             if (!mensaje.includes("✅")) {
                  comprobarRespuesta();
             }
@@ -173,7 +158,6 @@ export default function Quiz() {
         setRespuesta("");
         setMensaje("");
         seleccionarPalabraAleatoria(palabras);
-        // El foco se pondrá por el useEffect [palabra, mensaje]
     };
 
     if (mensaje.includes("Cargando")) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">{mensaje}</p></div>;
@@ -190,10 +174,9 @@ export default function Quiz() {
 
     return (
         <div
-            className="container-fluid d-flex flex-column align-items-center min-vh-100 p-3 pt-5 mt-4 bg-gradient"
+            className="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-3 bg-gradient" // Centrado vertical y quitado pt/mt extra
             style={{
                  background: "linear-gradient(135deg, #ff0000, #ffcc00)",
-                 overflowY: 'auto'
             }}
         >
 
@@ -208,19 +191,20 @@ export default function Quiz() {
             <div className="d-flex flex-column flex-md-row align-items-center gap-4 w-100 justify-content-center">
                 <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{maxWidth: '500px'}}>
 
-                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : (Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español) }</h1>
-                    {modo === "chino-espanol" && <p className="lead text-muted">{Array.isArray(palabra.pinyin) ? palabra.pinyin.join(' / ') : palabra.pinyin}</p>}
+                    {/* Asume que palabra.español y palabra.pinyin son strings */}
+                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : palabra.español }</h1>
+                    {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     <input
-                        ref={inputRef} 
+                        ref={inputRef}
                         type="text"
                         className="form-control form-control-lg mt-3 text-center"
                         value={respuesta}
                         onChange={(e) => setRespuesta(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={modo === 'chino-espanol' ? 'Escribe en español...' : 'Escribe en pinyin o chino...'}
-                        disabled={mensaje.includes("✅")} 
-                        autoComplete="off" 
+                        disabled={mensaje.includes("✅")}
+                        autoComplete="off"
                         aria-label="Respuesta"
                     />
 
@@ -230,12 +214,12 @@ export default function Quiz() {
 
                     {mensaje && !mensaje.includes("Cargando") && <p className={`mt-3 fs-4 fw-bold ${mensaje.includes("✅") ? 'text-success' : mensaje.includes("❌") ? 'text-danger' : 'text-info'}`}>{mensaje}</p>}
 
+                    {/* Mostrar respuesta correcta al acertar (asumiendo strings) */}
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
-                          <p className="mt-3 fs-3 text-success fw-bold">{Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
+                          <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
                      )}
-                    {/* Corregido: Mostrar Chino/Pinyin si es correcto en modo español-chino */}
-                    {modo === "espanol-chino" && esLaRespuestaCorrecta && mensaje.includes("✅") && (
-                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({Array.isArray(palabra.pinyin) ? palabra.pinyin.join(' / ') : palabra.pinyin})</p>
+                    {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
+                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
                      )}
 
 
@@ -248,13 +232,14 @@ export default function Quiz() {
                         </button>
                     </div>
 
+                    {/* Mostrar solución (asumiendo strings) */}
                     {mostrarSolucion && (
                         <div className="mt-4 fs-3 fw-bold alert alert-info">
                             {modo === "chino-espanol" ? (
-                                 <p>Español: {Array.isArray(palabra.español) ? palabra.español.join(' / ') : palabra.español}</p>
+                                 <p>Español: {palabra.español}</p>
                              ) : (
                                  <>
-                                     <p>Pinyin: {Array.isArray(palabra.pinyin) ? palabra.pinyin.join(' / ') : palabra.pinyin}</p>
+                                     <p>Pinyin: {palabra.pinyin}</p>
                                      <p>Chino: {palabra.chino}</p>
                                  </>
                              )}
@@ -263,7 +248,7 @@ export default function Quiz() {
                 </div>
 
                 <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
-                    <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
+                    <h3 className="fw-bold text-center mb-3 text-light">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
                             <div key={index} className="d-flex flex-column align-items-center gap-3">
@@ -271,7 +256,7 @@ export default function Quiz() {
                                     <button
                                         key={nivel}
                                         onClick={() => toggleNivel(nivel)}
-                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-success" : "btn-outline-dark"}`}
+                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-light" : "btn-outline-light"}`}
                                         style={{ width: "120px", height: "50px" }}
                                     >
                                         {nivel}
