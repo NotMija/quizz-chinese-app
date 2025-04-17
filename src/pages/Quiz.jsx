@@ -82,7 +82,7 @@ export default function Quiz() {
 
     useEffect(() => {
         if (palabra && inputRef.current && !mensaje.includes("✅")) {
-             inputRef.current.focus();
+            inputRef.current.focus();
         }
     }, [palabra, mensaje]);
 
@@ -120,12 +120,12 @@ export default function Quiz() {
             setMensaje("✅ ¡Correcto! Nueva palabra en 2 segundos...");
             playSound("correct");
             setTimeout(() => {
-                 seleccionarPalabraAleatoria(palabras);
-                 setMensaje("");
-                 setRespuesta("");
-                 setMostrarEspanol(false);
-                 setMostrarChino(false);
-                 setMostrarSolucion(false);
+                seleccionarPalabraAleatoria(palabras);
+                setMensaje("");
+                setRespuesta("");
+                setMostrarEspanol(false);
+                setMostrarChino(false);
+                setMostrarSolucion(false);
             }, 2000);
         } else {
             setMensaje("❌ Inténtalo de nuevo");
@@ -140,7 +140,7 @@ export default function Quiz() {
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             if (!mensaje.includes("✅")) {
-                 comprobarRespuesta();
+                comprobarRespuesta();
             }
         }
     };
@@ -176,7 +176,7 @@ export default function Quiz() {
         <div
             className="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-3 bg-gradient" // Centrado vertical y quitado pt/mt extra
             style={{
-                 background: "linear-gradient(135deg, #ff0000, #ffcc00)",
+                background: "linear-gradient(135deg, #ff0000, #ffcc00)",
             }}
         >
 
@@ -189,10 +189,10 @@ export default function Quiz() {
             </button>
 
             <div className="d-flex flex-column flex-md-row align-items-center gap-4 w-100 justify-content-center">
-                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{maxWidth: '500px'}}>
+                <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{ maxWidth: '500px' }}>
 
                     {/* Asume que palabra.español y palabra.pinyin son strings */}
-                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : palabra.español }</h1>
+                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : palabra.español}</h1>
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     <input
@@ -216,11 +216,11 @@ export default function Quiz() {
 
                     {/* Mostrar respuesta correcta al acertar (asumiendo strings) */}
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
-                          <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
-                     )}
+                        <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
+                    )}
                     {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
-                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
-                     )}
+                        <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
+                    )}
 
 
                     <div className="mt-4 d-flex gap-3 justify-content-center">
@@ -236,19 +236,19 @@ export default function Quiz() {
                     {mostrarSolucion && (
                         <div className="mt-4 fs-3 fw-bold alert alert-info">
                             {modo === "chino-espanol" ? (
-                                 <p>Español: {palabra.español}</p>
-                             ) : (
-                                 <>
-                                     <p>Pinyin: {palabra.pinyin}</p>
-                                     <p>Chino: {palabra.chino}</p>
-                                 </>
-                             )}
+                                <p>Español: {palabra.español}</p>
+                            ) : (
+                                <>
+                                    <p>Pinyin: {palabra.pinyin}</p>
+                                    <p>Chino: {palabra.chino}</p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
-
-                <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
-                    <h3 className="fw-bold text-center mb-3 text-light">Nº Palabras</h3>
+                
+                <div className="d-flex flex-column align-items-center gap-3" style={{ maxWidth: '300px' }}>
+                    <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
                             <div key={index} className="d-flex flex-column align-items-center gap-3">
@@ -256,7 +256,7 @@ export default function Quiz() {
                                     <button
                                         key={nivel}
                                         onClick={() => toggleNivel(nivel)}
-                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-light" : "btn-outline-light"}`}
+                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-success" : "btn-outline-dark"}`}
                                         style={{ width: "120px", height: "50px" }}
                                     >
                                         {nivel}
