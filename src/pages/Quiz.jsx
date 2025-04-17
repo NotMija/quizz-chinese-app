@@ -17,13 +17,13 @@ export default function Quiz() {
     const [nivelesSeleccionados, setNivelesSeleccionados] = useState([10]);
     const [palabras, setPalabras] = useState([]);
 
-    const inputRef = useRef(null); // Crear el ref para el input
+    const inputRef = useRef(null);
 
     const navigate = useNavigate();
     const location = useLocation();
 
     const modo = new URLSearchParams(location.search).get("modo") || "chino-espanol";
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'; // Fallback por si VITE_API_BASE_URL no está definida
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 
     const cargarPalabras = () => {
@@ -85,7 +85,7 @@ export default function Quiz() {
         if (palabra && inputRef.current && !mensaje.includes("✅")) { // Añadido !mensaje.includes("✅") para no re-enfocar durante el delay de éxito
              inputRef.current.focus();
         }
-    }, [palabra, mensaje]); // Depender también de mensaje puede ayudar a refocar después de un error
+    }, [palabra, mensaje]);
 
 
     const comprobarRespuesta = () => {
@@ -212,16 +212,16 @@ export default function Quiz() {
                     {modo === "chino-espanol" && <p className="lead text-muted">{Array.isArray(palabra.pinyin) ? palabra.pinyin.join(' / ') : palabra.pinyin}</p>}
 
                     <input
-                        ref={inputRef} // Asignar el ref al input
+                        ref={inputRef} 
                         type="text"
                         className="form-control form-control-lg mt-3 text-center"
                         value={respuesta}
                         onChange={(e) => setRespuesta(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={modo === 'chino-espanol' ? 'Escribe en español...' : 'Escribe en pinyin o chino...'}
-                        disabled={mensaje.includes("✅")} // Deshabilitar input mientras muestra mensaje de éxito
-                        autoComplete="off" // Desactivar autocompletado
-                        aria-label="Respuesta" // Mejorar accesibilidad
+                        disabled={mensaje.includes("✅")} 
+                        autoComplete="off" 
+                        aria-label="Respuesta"
                     />
 
                     <button onClick={comprobarRespuesta} className="btn btn-primary btn-lg mt-3" disabled={mensaje.includes("✅")}>
@@ -263,7 +263,7 @@ export default function Quiz() {
                 </div>
 
                 <div className="d-flex flex-column align-items-center gap-3" style={{maxWidth: '300px'}}>
-                    <h3 className="fw-bold text-center mb-3 text-light">Nº Palabras</h3> {/* Cambiado color a text-light */}
+                    <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {columnas.map((columna, index) => (
                             <div key={index} className="d-flex flex-column align-items-center gap-3">
@@ -271,7 +271,7 @@ export default function Quiz() {
                                     <button
                                         key={nivel}
                                         onClick={() => toggleNivel(nivel)}
-                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-light" : "btn-outline-light"}`} // Cambiado colores
+                                        className={`btn btn-lg fw-bold px-4 py-2 shadow-sm ${nivelesSeleccionados.includes(nivel) ? "btn-success" : "btn-outline-dark"}`}
                                         style={{ width: "120px", height: "50px" }}
                                     >
                                         {nivel}
