@@ -25,7 +25,6 @@ export default function Quiz() {
     const modo = new URLSearchParams(location.search).get("modo") || "chino-espanol";
     const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-
     const cargarPalabras = () => {
         setMostrarSolucion(false);
         setMostrarChino(false);
@@ -54,7 +53,7 @@ export default function Quiz() {
                 }
             })
             .catch(error => {
-                console.error("❌ Error al cargar palabras:", error);
+                console.error("❌ Error al cargar palabras:", error); // Mantengo este error por si falla la API
                 setMensaje("Error al cargar palabras. Revisa la conexión o la URL de la API.");
                 setPalabras([]);
                 setPalabra(null);
@@ -86,33 +85,32 @@ export default function Quiz() {
         }
     }, [palabra, mensaje]);
 
-
     const comprobarRespuesta = () => {
         if (!palabra) return;
 
-        let respuestaNormalizada = quitarAcentos(respuesta.toLowerCase());
+        const palabraEsp = String(palabra.español || "");
+        const palabraPin = String(palabra.pinyin || "");
+        const palabraChi = String(palabra.chino || "");
+        const respuestaStr = String(respuesta || "");
+
+        let respuestaNormalizada = quitarAcentos(respuestaStr.toLowerCase().trim());
         let esLaRespuestaCorrecta = false;
 
-        const palabraEsp = palabra.español || "";
-        const palabraPin = palabra.pinyin || "";
-        const palabraChi = palabra.chino || "";
-
         if (modo === "chino-espanol") {
-            let correctaEsp = quitarAcentos(palabraEsp.toLowerCase());
-            esLaRespuestaCorrecta = (correctaEsp === respuestaNormalizada);
-
-            if (esLaRespuestaCorrecta) {
-                setMostrarEspanol(true);
+            const correctasEspArray = palabraEsp.split('/')
+                                          .map(part => quitarAcentos(part.trim().toLowerCase()));
+            if (correctasEspArray.includes(respuestaNormalizada)) {
+                 esLaRespuestaCorrecta = true;
+                 setMostrarEspanol(true);
             }
-        }
-        else if (modo === "espanol-chino") {
-            let correctaPin = quitarAcentos(palabraPin.toLowerCase());
+        } else if (modo === "espanol-chino") {
+            let correctaPin = quitarAcentos(palabraPin.toLowerCase().trim());
             let pinyinCorrecto = (correctaPin === respuestaNormalizada);
-            let chinoCorrecto = (respuesta === palabraChi);
+            let chinoCorrecto = (respuestaStr.trim() === palabraChi);
 
             if (pinyinCorrecto || chinoCorrecto) {
                 esLaRespuestaCorrecta = true;
-                setMostrarChino(true); // Mostrar siempre la respuesta correcta si acierta
+                setMostrarChino(true);
             }
         }
 
@@ -135,7 +133,6 @@ export default function Quiz() {
             }
         }
     };
-
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -165,7 +162,6 @@ export default function Quiz() {
     if (!palabra && !mensaje) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">Cargando palabra...</p></div>;
     if (!palabra) return null;
 
-
     const nivelesDisponibles = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     const columnas = [
         nivelesDisponibles.slice(0, 5),
@@ -174,12 +170,11 @@ export default function Quiz() {
 
     return (
         <div
-            className="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-3 bg-gradient" // Centrado vertical y quitado pt/mt extra
+            className="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-3 bg-gradient"
             style={{
                 background: "linear-gradient(135deg, #ff0000, #ffcc00)",
             }}
         >
-
             <button
                 onClick={() => navigate("/")}
                 className="m-3 btn btn-warning text-dark fw-bold shadow-sm"
@@ -222,7 +217,6 @@ export default function Quiz() {
                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
                     )}
 
-
                     <div className="mt-4 d-flex gap-3 justify-content-center">
                         <button onClick={saltarPalabra} className="btn btn-warning btn-lg" disabled={mensaje.includes("✅")}>
                             🔄 Saltar palabra
@@ -246,7 +240,7 @@ export default function Quiz() {
                         </div>
                     )}
                 </div>
-                
+
                 <div className="d-flex flex-column align-items-center gap-3" style={{ maxWidth: '300px' }}>
                     <h3 className="fw-bold text-center mb-3">Nº Palabras</h3>
                     <div className="d-flex flex-wrap gap-3 justify-content-center">
