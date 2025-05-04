@@ -98,10 +98,10 @@ export default function Quiz() {
 
         if (modo === "chino-espanol") {
             const correctasEspArray = palabraEsp.split('/')
-                                          .map(part => quitarAcentos(part.trim().toLowerCase()));
+                .map(part => quitarAcentos(part.trim().toLowerCase()));
             if (correctasEspArray.includes(respuestaNormalizada)) {
-                 esLaRespuestaCorrecta = true;
-                 setMostrarEspanol(true);
+                esLaRespuestaCorrecta = true;
+                setMostrarEspanol(true);
             }
         } else if (modo === "espanol-chino") {
             let correctaPin = quitarAcentos(palabraPin.toLowerCase().trim());
@@ -159,14 +159,14 @@ export default function Quiz() {
 
     // Función para obtener el texto a mostrar en el H1 según el modo
     const getPromptDisplay = () => {
-        if (!palabra) return "";
+        if (!palabra) return ""; // Seguridad
 
         if (modo === "chino-espanol") {
-            return palabra.chino;
+            // Modo Chino -> Español: Muestra Chino
+            return String(palabra.chino || "");
         } else {
-            // Modo español-chino: Muestra solo la primera parte del español
-            const espanolCompleto = String(palabra.español || "");
-            return espanolCompleto.split('/')[0].trim();
+            // Modo Español -> Chino: Muestra el Español COMPLETO
+            return String(palabra.español || ""); // Devuelve el campo español tal cual
         }
     };
 
