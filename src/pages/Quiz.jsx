@@ -157,6 +157,20 @@ export default function Quiz() {
         seleccionarPalabraAleatoria(palabras);
     };
 
+    // Función para obtener el texto a mostrar en el H1 según el modo
+    const getPromptDisplay = () => {
+        if (!palabra) return "";
+
+        if (modo === "chino-espanol") {
+            return palabra.chino;
+        } else {
+            // Modo español-chino: Muestra solo la primera parte del español
+            const espanolCompleto = String(palabra.español || "");
+            return espanolCompleto.split('/')[0].trim();
+        }
+    };
+
+
     if (mensaje.includes("Cargando")) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">{mensaje}</p></div>;
     if (!palabra && mensaje !== "" && !mensaje.includes("✅") && !mensaje.includes("❌")) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-warning fs-3">{mensaje}</p></div>;
     if (!palabra && !mensaje) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">Cargando palabra...</p></div>;
@@ -187,7 +201,8 @@ export default function Quiz() {
                 <div className="card p-4 p-md-5 shadow-lg rounded-4 bg-light text-center" style={{ maxWidth: '500px' }}>
 
                     {/* Asume que palabra.español y palabra.pinyin son strings */}
-                    <h1 className="display-4">{modo === "chino-espanol" ? palabra.chino : palabra.español}</h1>
+                    <h1 className="display-4">{getPromptDisplay()}</h1>
+                    {/* El pinyin solo se muestra si el modo es chino-espanol */}
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     <input
@@ -213,6 +228,7 @@ export default function Quiz() {
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
                     )}
+                    {/* Corregido: Mostrar chino/pinyin al acertar en modo español-chino */}
                     {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
                     )}
@@ -233,6 +249,7 @@ export default function Quiz() {
                                 <p>Español: {palabra.español}</p>
                             ) : (
                                 <>
+                                    {/* Modo español-chino: Mostrar Pinyin y Chino */}
                                     <p>Pinyin: {palabra.pinyin}</p>
                                     <p>Chino: {palabra.chino}</p>
                                 </>
