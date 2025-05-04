@@ -88,7 +88,7 @@ export default function Quiz() {
     const comprobarRespuesta = () => {
         if (!palabra) return;
 
-        const palabraEsp = String(palabra.español || "");
+        // Asegurar que pinyin y chino sean strings
         const palabraPin = String(palabra.pinyin || "");
         const palabraChi = String(palabra.chino || "");
         const respuestaStr = String(respuesta || "");
@@ -97,11 +97,24 @@ export default function Quiz() {
         let esLaRespuestaCorrecta = false;
 
         if (modo === "chino-espanol") {
-            const correctasEspArray = palabraEsp.split('/')
-                .map(part => quitarAcentos(part.trim().toLowerCase()));
-            if (correctasEspArray.includes(respuestaNormalizada)) {
-                esLaRespuestaCorrecta = true;
-                setMostrarEspanol(true);
+            // Comprobar si palabra.español es un array válido
+            if (Array.isArray(palabra.español) && palabra.español.length > 0) {
+                // Normalizar cada posible respuesta correcta del array
+                const correctasEspArray = palabra.español.map(part =>
+                    quitarAcentos(String(part || "").trim().toLowerCase())
+                );
+                // Comprobar si la respuesta del usuario está en el array de correctas
+                if (correctasEspArray.includes(respuestaNormalizada)) {
+                    esLaRespuestaCorrecta = true;
+                    setMostrarEspanol(true);
+                }
+            } else {
+                // Si no es un array (o está vacío), tratarlo como un string simple
+                const correctaUnica = quitarAcentos(String(palabra.español || "").trim().toLowerCase());
+                if (correctaUnica === respuestaNormalizada) {
+                    esLaRespuestaCorrecta = true;
+                    setMostrarEspanol(true);
+                }
             }
         } else if (modo === "espanol-chino") {
             let correctaPin = quitarAcentos(palabraPin.toLowerCase().trim());
@@ -157,20 +170,31 @@ export default function Quiz() {
         seleccionarPalabraAleatoria(palabras);
     };
 
-    // Función para obtener el texto a mostrar en el H1 según el modo
+    // Función para mostrar el texto del H1 correctamente
     const getPromptDisplay = () => {
-        if (!palabra) return ""; // Seguridad
+        if (!palabra) return "";
 
         if (modo === "chino-espanol") {
-            // Modo Chino -> Español: Muestra Chino
             return String(palabra.chino || "");
         } else {
-            // Modo Español -> Chino: Muestra el Español COMPLETO
-            return String(palabra.español || ""); // Devuelve el campo español tal cual
+            if (Array.isArray(palabra.español)) {
+                return palabra.español.map(p => String(p || "")).join(" / ");
+            } else {
+                // Si no es array, mostrar como string simple
+                return String(palabra.español || "");
+            }
         }
     };
 
+    // Función para mostrar la respuesta
+    const displayEspanol = (espanolData) => {
+        if (Array.isArray(espanolData)) {
+            return espanolData.map(p => String(p || "")).join(" / ");
+        }
+        return String(espanolData || "");
+    };
 
+    // --- Renderizado del componente ---
     if (mensaje.includes("Cargando")) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">{mensaje}</p></div>;
     if (!palabra && mensaje !== "" && !mensaje.includes("✅") && !mensaje.includes("❌")) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-warning fs-3">{mensaje}</p></div>;
     if (!palabra && !mensaje) return <div className="container vh-100 d-flex justify-content-center align-items-center"><p className="text-primary fs-3">Cargando palabra...</p></div>;
@@ -202,7 +226,6 @@ export default function Quiz() {
 
                     {/* Asume que palabra.español y palabra.pinyin son strings */}
                     <h1 className="display-4">{getPromptDisplay()}</h1>
-                    {/* El pinyin solo se muestra si el modo es chino-espanol */}
                     {modo === "chino-espanol" && <p className="lead text-muted">{palabra.pinyin}</p>}
 
                     <input
@@ -224,11 +247,11 @@ export default function Quiz() {
 
                     {mensaje && !mensaje.includes("Cargando") && <p className={`mt-3 fs-4 fw-bold ${mensaje.includes("✅") ? 'text-success' : mensaje.includes("❌") ? 'text-danger' : 'text-info'}`}>{mensaje}</p>}
 
-                    {/* Mostrar respuesta correcta al acertar (asumiendo strings) */}
+                    {/* Mostrar respuesta correcta al acertar (chino-espanol) */}
                     {modo === "chino-espanol" && mostrarEspanol && mensaje.includes("✅") && (
-                        <p className="mt-3 fs-3 text-success fw-bold">{palabra.español}</p>
+                        <p className="mt-3 fs-3 text-success fw-bold">{displayEspanol(palabra.español)}</p>
                     )}
-                    {/* Corregido: Mostrar chino/pinyin al acertar en modo español-chino */}
+                    {/* Mostrar chino/pinyin al acertar (espanol-chino) */}
                     {modo === "espanol-chino" && mostrarChino && mensaje.includes("✅") && (
                         <p className="mt-3 fs-3 text-success fw-bold">{palabra.chino} ({palabra.pinyin})</p>
                     )}
@@ -242,14 +265,13 @@ export default function Quiz() {
                         </button>
                     </div>
 
-                    {/* Mostrar solución (asumiendo strings) */}
+                    {/* Mostrar solución */}
                     {mostrarSolucion && (
                         <div className="mt-4 fs-3 fw-bold alert alert-info">
                             {modo === "chino-espanol" ? (
-                                <p>Español: {palabra.español}</p>
+                                <p>Español: {displayEspanol(palabra.español)}</p>
                             ) : (
                                 <>
-                                    {/* Modo español-chino: Mostrar Pinyin y Chino */}
                                     <p>Pinyin: {palabra.pinyin}</p>
                                     <p>Chino: {palabra.chino}</p>
                                 </>
