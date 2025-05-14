@@ -218,7 +218,7 @@ export default function Quiz() {
                 className="m-3 btn btn-warning text-dark fw-bold shadow-sm"
                 style={{ position: 'fixed', top: '1rem', left: '1rem', zIndex: 10 }}
             >
-                ⬅️ Volver al inicio
+                ⬅️
             </button>
 
             <div className="d-flex flex-column flex-md-row align-items-center gap-4 w-100 justify-content-center">
