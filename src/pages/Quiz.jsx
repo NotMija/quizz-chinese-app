@@ -211,6 +211,7 @@ export default function Quiz() {
             className="container-fluid d-flex flex-column align-items-center justify-content-center min-vh-100 p-3 bg-gradient"
             style={{
                 background: "linear-gradient(135deg, #ff0000, #ffcc00)",
+                paddingTop: '4rem',
             }}
         >
             <button
